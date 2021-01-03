@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ZLisp.Language;
+using ZLisp.Language.Error;
 using ZLisp.Language.Parser;
 using static ZLisp.Language.Syntax.Types;
 
@@ -12,10 +13,9 @@ namespace ZLisp.Runtime
         public static Environment Env { get => EnvironmentSingleton.Instance.Env; }
 
         public static Value Eval(string src) => Eval(Parser.Parse(src));
-        public static Value Eval(SourceDocument srcDoc) => Eval(srcDoc.Children);
-        public static Value Eval(IEnumerable<Value> ast) => Eval(ast, Env);
+        public static Value Eval(SourceDocument srcDoc) => Eval(srcDoc.Children, Env , srcDoc.SourceCode);
 
-        public static Value Eval(IEnumerable<Value> ast, Environment env)
+        public static Value Eval(IEnumerable<Value> ast, Environment env, SourceCode src)
         {
             if (!ast.Any())
             {
@@ -24,30 +24,30 @@ namespace ZLisp.Runtime
 
             if (ast.Count() == 1)
             {
-                return Eval(ast.First(), env);
+                return Eval(ast.First(), env, src);
             }
 
             var result = new Expression();
             foreach (var node in ast)
             {
-                result.ConjBANG(Eval(node, env));
+                result.ConjBANG(Eval(node, env, src));
             }
             return result;
         }
 
-        public static Value Eval(Value node, Environment env)
+        public static Value Eval(Value node, Environment env, SourceCode src)
         {
             while (true)
             {
                 if (!node.IsList())
                 {
-                    return EvalAst(node, env);
+                    return EvalAst(node, env, src);
                 }
 
                 var expanded = ExpandMacro(node, env);
                 if (!expanded.IsList())
                 {
-                    return EvalAst(expanded, env);
+                    return EvalAst(expanded, env, src);
                 }
 
                 var ast = (Expression)expanded;
@@ -57,84 +57,110 @@ namespace ZLisp.Runtime
                 }
 
                 var a0sym = ast[0] is Symbol symbol ? symbol.GetName() : "__<*fn*>__";
-
-                switch (a0sym)
+                
+                try
                 {
-                    case "def":
-                        var result = Eval(ast[2], env);
-                        env.Set((Symbol)ast[1], result);
-                        return result;
-                    case "let":
-                        var arg1 = (Expression)ast[1];
-                        var let_env = new Environment(env);
-                        for (int i = 0; i < arg1.Size(); i += 2) // Every other
-                        {
-                            var key = (Symbol)arg1[i];
-                            var val = arg1[i + 1];
-                            let_env.Set(key, Eval(val, let_env));
-                        }
-                        node = ast[2];
-                        env = let_env;
-                        continue;
-                    case "fn":
-                        var fnParam = (Expression)ast[1];
-                        var fnBody = ast[2];
-                        var cur_env = env;
-                        return new Func(fnBody, env, fnParam, args => Eval(fnBody, new Environment(cur_env, fnParam, args)));
+                    switch (a0sym)
+                    {
+                        case "def":
+                            var result = Eval(ast[2], env, src);
+                            env.Set((Symbol)ast[1], result);
+                            return result;
+                        case "let":
+                            var arg1 = (Expression)ast[1];
+                            var let_env = new Environment(env);
+                            for (int i = 0; i < arg1.Size(); i += 2) // Every other
+                            {
+                                var key = (Symbol)arg1[i];
+                                var val = arg1[i + 1];
+                                let_env.Set(key, Eval(val, let_env, src));
+                            }
+                            node = ast[2];
+                            env = let_env;
+                            continue;
+                        case "fn":
+                            var fnParam = (Expression)ast[1];
+                            var fnBody = ast[2];
+                            var cur_env = env;
+                            return new Func(fnBody, env, fnParam, args => Eval(fnBody, new Environment(cur_env, fnParam, args), src));
 
 
-                    case "quote":
-                        return ast[1];
-                    case "quasiquote":
-                        node = Quasiquote(ast[1]);
-                        continue;
-                    case "quasiquoteexpand":
-                        return Quasiquote(ast[1]);
+                        case "quote":
+                            return ast[1];
+                        case "quasiquote":
+                            node = Quasiquote(ast[1]);
+                            continue;
+                        case "quasiquoteexpand":
+                            return Quasiquote(ast[1]);
 
 
-                    case "defmacro":
-                        var res = (Func)Eval(ast[2], env);
-                        res.SetMacro();
-                        env.Set(((Symbol)ast[1]), res);
-                        return res;
-                    case "macroexpand":
-                        return ExpandMacro(ast[1], env);
+                        case "defmacro":
+                            var res = (Func)Eval(ast[2], env, src);
+                            res.SetMacro();
+                            env.Set(((Symbol)ast[1]), res);
+                            return res;
+                        case "macroexpand":
+                            return ExpandMacro(ast[1], env);
 
 
-                    case "do":
-                        EvalAst(ast.Slice(1, ast.Size() - 1), env);
-                        node = ast[ast.Size() - 1];
-                        continue;
-                    case "if":
-                        var cond = Eval(ast[1], env);
-                        var isTrue = !(cond == Nil || cond == False);
-                        if (!isTrue && ast.Size() < 3)
-                        {
-                            return Nil;
-                        }
-                        node = isTrue ? ast[2] : ast[3];
-                        continue;
+                        case "do":
+                            EvalAst(ast.Slice(1, ast.Size() - 1), env, src);
+                            node = ast[ast.Size() - 1];
+                            continue;
+                        case "if":
+                            var cond = Eval(ast[1], env, src);
+                            var isTrue = !(cond == Nil || cond == False);
+                            if (!isTrue && ast.Size() < 3)
+                            {
+                                return Nil;
+                            }
+                            node = isTrue ? ast[2] : ast[3];
+                            continue;
 
 
-                    default:
-                        var el = (Expression)EvalAst(ast, env);
-                        var fn = (Func)el[0];
-                        var fnAst = fn.GetAst();
-                        if (fnAst != null)
-                        {
-                            node = fnAst;
-                            env = fn.GetEnv(el.Rest());
-                        }
-                        else
-                        {
-                            return fn.Apply(el.Rest());
-                        }
-                        continue;
+                        default:
+                            var el = (Expression)EvalAst(ast, env, src);
+                            var fn = (Func)el[0];
+                            var fnAst = fn.GetAst();
+                            if (fnAst != null)
+                            {
+                                node = fnAst;
+                                env = fn.GetEnv(el.Rest());
+                            }
+                            else
+                            {
+                                return fn.Apply(el.Rest());
+                            }
+                            continue;
+                    }
+                }
+                catch(RuntimeException ex)
+                {
+                    
+                    if(node is SyntaxNode sn)
+                    {
+                        var err = new ErrorEntry(ex.Message, src.GetLines(sn.Span.Start.Line, sn.Span.End.Line), Severity.Warning, sn.Span);
+                        err.ConsolePrint();
+                    }
+                    else
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    continue;
+                }
+                catch (InvalidCastException ex)
+                {
+                    if (node is SyntaxNode sn)
+                    {
+                        var err = new ErrorEntry(ex.Message, src.GetLines(sn.Span.Start.Line, sn.Span.End.Line), Severity.Error, sn.Span);
+                        err.ConsolePrint();
+                        return Nil;
+                    }
                 }
             }
         }
 
-        private static Value EvalAst(Value ast, Environment env)
+        private static Value EvalAst(Value ast, Environment env, SourceCode src)
         {
             switch (ast)
             {
@@ -143,14 +169,14 @@ namespace ZLisp.Runtime
 
                 case Expression exp:
                     var list = exp.IsList() ? new Expression() : new Vector();
-                    exp.Contents.ForEach(x => list.ConjBANG(Eval(x, env)));
+                    exp.Contents.ForEach(x => list.ConjBANG(Eval(x, env, src)));
                     return list;
 
                 case HashMap map:
                     var dict = new Dictionary<string, Value>();
                     foreach (var entry in map.Contents)
                     {
-                        dict.Add(entry.Key, Eval(entry.Value, env));
+                        dict.Add(entry.Key, Eval(entry.Value, env, src));
                     }
                     return new HashMap(dict);
 
