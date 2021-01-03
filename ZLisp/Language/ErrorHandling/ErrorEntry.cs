@@ -52,7 +52,7 @@ namespace ZLisp.Language.Error
                 Console.WriteLine(new string('^', Span.Length));
                 Console.WriteLine($"{Severity} {Span}: {Message}");
             }
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }
