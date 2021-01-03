@@ -34,6 +34,7 @@ namespace ZLisp.Language.Error
             };
             if (Lines.Length > 1)
             {
+                Console.WriteLine($"{Severity}: {Message}");
                 Console.WriteLine(Lines.First());
                 Console.CursorLeft = Span.Start.Column;
                 Console.WriteLine(new string('^', Lines[0].Length - Span.Start.Column));
@@ -47,10 +48,10 @@ namespace ZLisp.Language.Error
             }
             else
             {
+                Console.WriteLine($"{Severity}: {Message}");
                 Console.WriteLine(Lines.First());
                 Console.CursorLeft = Span.Start.Column;
                 Console.WriteLine(new string('^', Span.Length));
-                Console.WriteLine($"{Severity}: {Message}");
             }
             Console.ForegroundColor = ConsoleColor.White;
         }
