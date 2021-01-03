@@ -7,7 +7,7 @@ namespace ZLisp.Language.Parser
 {
     public sealed partial class Parser
     {
-        internal Value ParseInternal()
+        internal SyntaxNode ParseInternal()
         {
             switch (_current.Kind)
             {
@@ -20,16 +20,21 @@ namespace ZLisp.Language.Parser
 
                 case TokenKind.Ampersand:
                     var ampersand = Take();
-                    return new Symbol(ampersand.Kind.ToString().ToLower());
+                    return new Symbol(ampersand.Kind.ToString().ToLower(), CreateSpan(ampersand));
 
                 case TokenKind.Quote:
                 case TokenKind.Quasiquote:
                 case TokenKind.Unquote:
                 case TokenKind.SpliceUnquote:
                 case TokenKind.Deref:
-                    var symbol = new Symbol(_current.Kind.ToString().ToLower());
-                    Take();
-                    return new Expression(symbol, ParseInternal());
+                    var symbol = Take();
+                    var nextSyntaxNode = ParseInternal();
+                    var list = new List<Value>() 
+                    { 
+                        new Symbol(symbol.Kind.ToString().ToLower(), symbol.Span),
+                        nextSyntaxNode
+                    };
+                    return new Expression(list, CreateSpan(symbol));
 
                 case TokenKind.Meta:
                     var meta = ParseInternal();
@@ -51,10 +56,10 @@ namespace ZLisp.Language.Parser
             {
                 case TokenKind.StringLiteral:
                     var str = Take();
-                    return new Types.String(str.Value, str.Span);
+                    return new Types.String(str.Value, CreateSpan(str));
                 case TokenKind.IntegerLiteral:
                     var num = Take();
-                    return new Integer(Int64.Parse(num.Value), num.Span);
+                    return new Integer(Int64.Parse(num.Value), CreateSpan(num));
                 case TokenKind.FloatLiteral:
                     throw new NotImplementedException();
                 //var flt = Take();
@@ -64,12 +69,12 @@ namespace ZLisp.Language.Parser
                     if (_current == "true" || _current == "false" || _current == "nil")
                     {
                         var Const = Take();
-                        return new Constant(Const.Value, Const.Span);
+                        return new Constant(Const.Value, CreateSpan(Const));
                     }
                     else
                     {
                         var keyword = Take();
-                        return new Symbol(keyword.Value, keyword.Span);
+                        return new Symbol(keyword.Value, CreateSpan(keyword));
                     }
 
                 case TokenKind.Colon:
@@ -94,11 +99,11 @@ namespace ZLisp.Language.Parser
                 case TokenKind.LineComment:
                 case TokenKind.InLineComment:
                     var atom = Take();
-                    return new Comment(atom.Value, atom.Span);
+                    return new Comment(atom.Value, CreateSpan(atom));
 
                 symbol:
                     var symbol = Take();
-                    return new Symbol(symbol.Value, symbol.Span);
+                    return new Symbol(symbol.Value, CreateSpan(symbol));
 
                 default:
                     throw UnexpectedToken("Atom");
