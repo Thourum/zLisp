@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Samuel Asvanyi</Authors>
+    <Company>Zealand</Company>
+    <Description>Zealand flavored lisp language</Description>
+    <RepositoryUrl>https://github.com/Thourum/MakeALisp</RepositoryUrl>
+    <SignAssembly>false</SignAssembly>
+    <DelaySign></DelaySign>
+    <AssemblyOriginatorKeyFile />
+    <AnalysisLevel>5.0</AnalysisLevel>
+  </PropertyGroup>
+
+</Project>
