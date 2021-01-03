@@ -12,7 +12,7 @@ namespace ConsoleRepl
         static void Main(string[] args)
         {
             Runtime.Eval("(def not (fn (a) (if a false true)))");
-            Runtime.Eval("(def load-file (fn (f) (eval (read-string (str \"(do\" (slurp f) \"\nnil)\")))))");
+            Runtime.Eval("(def load-file (fn (f) (eval (str \"(do\" (slurp f) \"\nnil)\"))))");
             Runtime.Eval("(defmacro cond (fn (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
             Runtime.Eval("(defmacro unless (fn (pred a b) `(if ~pred ~b ~a)))");
             Runtime.Eval("(defmacro defun (fn (n p b) `(def ~n (fn ~p ~b))))");
