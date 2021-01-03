@@ -29,9 +29,7 @@ namespace ZLisp.Language.Parser
             _errorSink = errorSink;
         }
 
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        private void AddError(Severity severity, string message, SourceSpan? span = null)
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+        private void AddError(Severity severity, string message, SourceSpan span = null)
         {
             _errorSink.AddError(message, _sourceCode, severity, span ?? CreateSpan(_current));
         }
@@ -97,9 +95,7 @@ namespace ZLisp.Language.Parser
             return _tokens.ElementAtOrDefault(_index + ahead) ?? _tokens.Last();
         }
 
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        private SyntaxException SyntaxError(Severity severity, string message, SourceSpan? span = null)
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+        private SyntaxException SyntaxError(Severity severity, string message, SourceSpan span = null)
         {
             _error = true;
             AddError(severity, message, span);
