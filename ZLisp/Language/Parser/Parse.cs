@@ -36,11 +36,6 @@ namespace ZLisp.Language.Parser
                     };
                     return new Expression(list, CreateSpan(symbol));
 
-                case TokenKind.Meta:
-                    var meta = ParseInternal();
-                    Take();
-                    return new Expression(new Symbol("Meta"), ParseInternal(), meta);
-
                 case TokenKind.RightParenthesis:
                 case TokenKind.RightBrace:
                 case TokenKind.RightBracket:

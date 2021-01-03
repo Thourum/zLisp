@@ -37,11 +37,6 @@ namespace ZLisp.Language.Parser
                     contents.Add(ParseInternal());
                 }
 
-                if (_current != TokenKind.EndOfFile)
-                {
-                    AddError(Severity.Error, "Top-level statements are not permitted within the current options.", CreateSpan(_current.Span.Start, _tokens.Last().Span.End));
-                }
-
                 return new SourceDocument(CreateSpan(start), _sourceCode, contents);
             }
             catch (SyntaxException)
