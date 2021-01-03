@@ -1,0 +1,23 @@
+(def x 3) ; => 3
+(def y 4) ; => 4
+(println y)
+(def y (+ 1 7)) ; => 8
+(println y)
+
+(def mynum 111)
+(def MYNUM 222)
+(println mynum)
+(println MYNUM)
+
+(abc 1 2 3) ;; env lookup non-fatal error
+(def w 123)
+(def w (abc)) ;; error aborts def
+(println w)
+
+(let (z 9) z) ; => 9
+(let (x 9) x) ; => 9
+
+(let (z (+ 2 3)) (+ 1 z)) ; => 6
+(let (p (+ 2 3) q (+ 2 p)) (+ p q)) ; => 12
+(def y (let (z 7) z))
+(println w) ; =>7
