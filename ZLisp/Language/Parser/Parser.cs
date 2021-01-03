@@ -14,10 +14,10 @@ namespace ZLisp.Language.Parser
             var src = new SourceCode(sourceCode);
 
             var tokens = lexer.LexFile(src).ToArray();
-            if (errorSink.HasErrors) { errorSink.ConsolePrint(); }
+            if (errorSink.HasErrors) { errorSink.ConsolePrint(); return null; }
 
             var sourceDoc = parser.ParseFile(src, tokens);
-            if (errorSink.HasErrors) { errorSink.ConsolePrint(); }
+            if (errorSink.HasErrors) { errorSink.ConsolePrint(); return null; }
 
             return sourceDoc;
         }
