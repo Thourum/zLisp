@@ -50,7 +50,7 @@ namespace ZLisp.Language.Error
                 Console.WriteLine(Lines.First());
                 Console.CursorLeft = Span.Start.Column;
                 Console.WriteLine(new string('^', Span.Length));
-                Console.WriteLine($"{Severity} {Span}: {Message}");
+                Console.WriteLine($"{Severity}: {Message}");
             }
             Console.ForegroundColor = ConsoleColor.White;
         }
