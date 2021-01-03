@@ -88,6 +88,20 @@ namespace ZLisp.Runtime
                 return new Types.String(line);
             });
 
+        public static readonly Func EvalSrc = new Func(ast =>
+        {
+            if (ast[0] is Types.String str)
+            {
+                var srcDoc = Parser.Parse(str.GetValue());
+                return Eval(srcDoc.Children.First(), Env, srcDoc.SourceCode);
+            }
+            else
+            {
+                throw new RuntimeException($"eval argument is not a string");
+            }
+        });
+
+
         public static readonly Func ReadString = new Func(
             a => Parser.Parse(a[0] is Types.String str ? 
                 str.GetValue() : 
@@ -389,6 +403,7 @@ namespace ZLisp.Runtime
             {"println", Println},
             {"readline", Readline},
             {"read-string", ReadString},
+            {"eval", EvalSrc },
             {"slurp", Slurp},
             {"time-ms", TimeMs},
 

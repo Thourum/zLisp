@@ -17,7 +17,6 @@ namespace ConsoleRepl
             Runtime.Eval("(defmacro unless (fn (pred a b) `(if ~pred ~b ~a)))");
             Runtime.Eval("(defmacro defun (fn (n p b) `(def ~n (fn ~p ~b))))");
 
-            Runtime.Env.Set(new Symbol("eval"), new Func(ast => Runtime.Eval(ast[0], Runtime.Env)));
             if (args.Length > 0)
             {
                 Expression _argv = new Expression();
