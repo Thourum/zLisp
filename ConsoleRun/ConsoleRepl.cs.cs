@@ -64,7 +64,9 @@ namespace ConsoleRepl
     Welcome to Zealand LISP, a crude lisp implementation done in C#
     By Samuel Asvanyi for a school project @ Zealand 2021
 ";
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine(introStr);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }
