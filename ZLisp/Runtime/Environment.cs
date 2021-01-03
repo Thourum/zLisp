@@ -53,7 +53,7 @@ namespace ZLisp.Runtime
             Environment e = Find(key);
             if (e == null)
             {
-                throw new SyntaxException(
+                throw new RuntimeException(
                         "'" + key.GetName() + "' not found");
             }
             else

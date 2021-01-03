@@ -88,7 +88,11 @@ namespace ZLisp.Runtime
                 return new Types.String(line);
             });
 
-        public static readonly Func ReadString = new Func(a => Parser.Parse((((Types.String)a[0]).GetValue())).Children.First());
+        public static readonly Func ReadString = new Func(
+            a => Parser.Parse(a[0] is Types.String str ? 
+                str.GetValue() : 
+                throw new RuntimeException($"read-string argument {a[0]} is not a string"))
+            .Children.First());
         public static readonly Func Slurp = new Func(a => new Types.String(File.ReadAllText(((Types.String)a[0]).GetValue())));
 
 
