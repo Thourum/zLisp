@@ -1,0 +1,23 @@
+(defun goDown (position desired)
+	(unless (= position desired)
+		(do
+				(println (str "Position X: " position))
+				(goDown (- position 1) desired))
+		position))
+
+(def positionX 5)
+(println (str "postionX Value:" positionX))
+(def positionX (goDown positionX 0))
+(println (str "postionX Value:" positionX))
+
+(let
+		(goUp
+		 (fn (x)
+				 (unless (= x 0)
+					 (do
+							 (println (str "X:" x))
+							 (goUp (- x 1)))
+					 nil)))
+	(goUp 5))
+
+
