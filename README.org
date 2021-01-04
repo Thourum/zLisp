@@ -1,0 +1,78 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+TITLE: zLisp
+#+DATE: <2021-01-03 Sun>
+#+AUTHOR: Samuel Asvanyi
+#+EMAIL: samoasvanyi@thourum.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.3 (Org mode 9.1.9)
+
+* zLisp
+
+** Introduction
+ zLisp (Zealand LISP) is a turing complete lisp interpreted programming
+ languged developed for Zealand as part of a final project assignment.
+
+** Getting started
+As the project does not have any portable executable the user is required to
+compile the source code to run it.
+
+It can be done by:
+- Visual Studio :: Open the solution file and run
+- netcore cli :: by running `dotnet run` inside the *ConsoleRun* folder
+
+** Using
+There are two ways one can use zLisp
+
+*** REPL
+The easiest is to use it as a standalone REPL, a Read-Eval-Print-Loop, that
+launches a environment where you can execute your code and normal fashion.
+
+**** Example
+#+BEGIN_SRC 
+$ dotnet run
+
+                   █████       █████  █████████  ███████████
+                  ░░███       ░░███  ███░░░░░███░░███░░░░░███
+      █████████    ░███        ░███ ░███    ░░░  ░███    ░███
+     ░█░░░░███     ░███        ░███ ░░█████████  ░██████████
+     ░   ███░      ░███        ░███  ░░░░░░░░███ ░███░░░░░░
+       ███░   █    ░███      █ ░███  ███    ░███ ░███
+      █████████    ███████████ █████░░█████████  █████
+     ░░░░░░░░░    ░░░░░░░░░░░ ░░░░░  ░░░░░░░░░  ░░░░░
+
+    Welcome to Zealand LISP, a crude lisp implementation done in C#
+    By Samuel Asvanyi for a school project @ Zealand 2021
+
+zLisp > (def x 123)
+zLisp > (println x)
+123
+zLisp > (def x "hello World!")
+zLisp > (println x)
+hello World!
+zLisp >
+#+END_SRC
+
+*** Library in C#
+Second way is to use the library inside your C# code where you would like to
+expose a part of your program with out having to create a seperate API for your
+application. You can use the zLisp library and let the user provide you with
+the code where you can chose to expose certain functions to them.
+
+#+BEGIN_SRC csharp
+using ZLisp.Runtime;
+
+Runtime.Eval("(def not (fn (a) (if a false true)))"); // will define a not
+function 
+var results = Runtime.Eval("(not true)");
+Console.WriteLine(results); // false
+
+Runtime.Env.Set(new Symbol("is2"), new Func(a => ((Types.Integer)a[0]).Value == 2););
+Console.WriteLine(Runtime.Eval("(is2 2)")); // true
+Console.WriteLine(Runtime.Eval("(is2 4)")); // false
+
+#+END_SRC
