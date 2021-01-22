@@ -146,7 +146,7 @@ namespace ZLisp.Runtime
                     {
                         Console.WriteLine(ex.Message);
                     }
-                    continue;
+                    return Nil;
                 }
                 catch (InvalidCastException ex)
                 {
