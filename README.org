@@ -12,7 +12,7 @@
 #+CREATOR: Emacs 26.3 (Org mode 9.1.9)
 
 * zLisp
-
+See [[file:doc/zLisp_paper.org][docs]] or [[file:docs/Extending The Functionality Of A Running C# Program Using Auxiliary High-Level Interpreted Language.pdf][paper.pdf]]
 ** Introduction
  zLisp (Zealand LISP) is a turing complete lisp interpreted programming
  languged developed for Zealand as part of a final project assignment.
